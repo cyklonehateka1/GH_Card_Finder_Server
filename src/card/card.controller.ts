@@ -12,7 +12,6 @@ import {
 } from "@nestjs/common";
 import { CreateCardDto, SearchCardDto } from "./card.dto";
 import { Card } from "./card";
-import { CardEntity } from "./card.entity";
 import { AuthGuard } from "src/authGuard";
 
 @Controller("api/card")
@@ -53,7 +52,6 @@ export class CardController {
 
   @Get("search")
   async searchCard(@Query() searchCardDto: SearchCardDto): Promise<{}> {
-    console.log("first");
     if (!Object.keys(searchCardDto).length) {
       throw new BadRequestException(
         "At least one search parameter is required",

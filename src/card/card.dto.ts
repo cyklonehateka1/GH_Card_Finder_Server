@@ -1,7 +1,7 @@
 export class CreateCardDto {
-  name: string;
+  firstName: string;
+  lastName: string;
   idNumber: string;
-  phone: string;
   dateReported: string;
   dob: string;
   profileImg: string;

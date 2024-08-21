@@ -10,7 +10,7 @@ import { CardEntity } from "./card/card.entity";
   imports: [
     TypeOrmModule.forRoot({
       type: "postgres",
-      url: process.env.DEV_DB_URL,
+      url: process.env.PROD_DB_URL,
       entities: [CardEntity],
       synchronize: true,
       logging: false,

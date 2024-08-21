@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { CardEntity } from "./card.entity";
-import { Repository } from "typeorm";
+import { Like, Repository } from "typeorm";
 import { CreateCardDto, SearchCardDto } from "./card.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 
@@ -22,8 +22,8 @@ export class Card {
       dob,
       idNumber,
       locationOfDocument,
-      name,
-      phone,
+      firstName,
+      lastName,
       profileImg,
       repoter_address,
       repoter_name,
@@ -31,13 +31,15 @@ export class Card {
       type,
     } = card;
 
+    console.log(card);
+
     if (
       !dateReported ||
       !dob ||
       !idNumber ||
       !locationOfDocument ||
-      !name ||
-      !phone ||
+      !firstName ||
+      !lastName ||
       !profileImg ||
       !repoter_address ||
       !repoter_name ||
@@ -64,7 +66,7 @@ export class Card {
       where: { id },
     });
     if (!card) {
-      throw new NotFoundException("Product not found");
+      throw new NotFoundException("Card not found");
     }
 
     Object.assign(card, updateCardDto);
@@ -100,33 +102,24 @@ export class Card {
     await this.cardRepository.remove(card);
   }
 
-  async searchCard(searchCardDto: SearchCardDto): Promise<{}> {
+  async searchCard(searchCardDto: SearchCardDto): Promise<any> {
     const { idNumber, firstName, lastName, dob } = searchCardDto;
 
-    if (idNumber) {
-      const card = await this.cardRepository.find({
-        where: { idNumber },
-      });
-      if (!card.length) {
-        throw new NotFoundException("Card not found");
-      }
-      return card;
+    const query: any = {};
+
+    if (idNumber) query.idNumber = Like(`%${idNumber}%`);
+    if (firstName) query.firstName = Like(`%${firstName}%`);
+    if (lastName) query.lastName = Like(`%${lastName}%`);
+    if (dob) query.dob = Like(`%${dob}%`);
+
+    const cards = await this.cardRepository.find({ where: query });
+
+    if (cards.length === 0) {
+      throw new NotFoundException(
+        "No cards found matching the search criteria",
+      );
     }
 
-    if (firstName && lastName && dob) {
-      const card = await this.cardRepository.find({
-        where: {
-          firstName,
-          lastName,
-          dob,
-        },
-      });
-      if (!card.length) {
-        throw new NotFoundException("Card not found");
-      }
-      return { message: "Card Found", data: card };
-    }
-
-    throw new BadRequestException("Insufficient search parameters");
+    return cards;
   }
 }

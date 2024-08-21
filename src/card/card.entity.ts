@@ -19,12 +19,6 @@ export class CardEntity {
   @Column({ nullable: false, unique: true })
   idNumber: string;
 
-  @Column({ nullable: false, unique: false })
-  status: string;
-
-  @Column({ nullable: true })
-  phone: string;
-
   @Column({ nullable: false })
   dateReported: string;
 
