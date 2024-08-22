@@ -1,4 +1,5 @@
-export class CreateCardDto {
+export interface CardDetails {
+  id: string;
   firstName: string;
   lastName: string;
   idNumber: string;
@@ -10,14 +11,5 @@ export class CreateCardDto {
   repoter_phone: string;
   repoter_address: string;
   locationOfDocument: string;
-}
-
-export class SearchCardDto {
-  idNumber?: string;
-  firstName?: string;
-  lastName?: string;
-  dob?: string;
-}
-export class AdminSearchCardDto {
-  search: string;
+  created_at: Date;
 }

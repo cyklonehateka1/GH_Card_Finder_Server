@@ -5,9 +5,10 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { CardEntity } from "./card.entity";
-import { Like, Repository } from "typeorm";
-import { CreateCardDto, SearchCardDto } from "./card.dto";
+import { ILike, Like, Repository } from "typeorm";
+import { AdminSearchCardDto, CreateCardDto, SearchCardDto } from "./card.dto";
 import { InjectRepository } from "@nestjs/typeorm";
+import { CardDetails } from "src/types";
 
 @Injectable()
 export class Card {
@@ -87,7 +88,7 @@ export class Card {
   }
 
   async findOne(id: string): Promise<CardEntity> {
-    const card = await this.cardRepository.findOne({ where: { id } });
+    const card = await this.cardRepository.findOne({ where: { idNumber: id } });
     if (!card) {
       throw new NotFoundException("Card not found");
     }
@@ -102,7 +103,7 @@ export class Card {
     await this.cardRepository.remove(card);
   }
 
-  async searchCard(searchCardDto: SearchCardDto): Promise<any> {
+  async searchCard(searchCardDto: SearchCardDto): Promise<CardDetails[]> {
     const { idNumber, firstName, lastName, dob } = searchCardDto;
 
     const query: any = {};
@@ -114,7 +115,33 @@ export class Card {
 
     const cards = await this.cardRepository.find({ where: query });
 
-    if (cards.length === 0) {
+    if (!cards || cards.length === 0) {
+      throw new NotFoundException(
+        "No cards found matching the search criteria",
+      );
+    }
+
+    return cards; // Ensure this returns an array of CardDetails objects
+  }
+
+  async adminSearchCard(
+    searchCardDto: AdminSearchCardDto,
+  ): Promise<CardDetails[]> {
+    const { search } = searchCardDto;
+
+    const query: any = [];
+
+    if (search) {
+      query.push({ idNumber: ILike(`%${search}%`) });
+      query.push({ firstName: ILike(`%${search}%`) });
+      query.push({ lastName: ILike(`%${search}%`) });
+    }
+
+    const cards = await this.cardRepository.find({
+      where: query.length > 0 ? query : {},
+    });
+
+    if (!cards || cards.length === 0) {
       throw new NotFoundException(
         "No cards found matching the search criteria",
       );

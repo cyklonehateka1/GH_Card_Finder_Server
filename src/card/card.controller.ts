@@ -10,18 +10,19 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { CreateCardDto, SearchCardDto } from "./card.dto";
+import { AdminSearchCardDto, CreateCardDto, SearchCardDto } from "./card.dto";
 import { Card } from "./card";
 import { AuthGuard } from "src/authGuard";
+import { CardDetails } from "src/types";
 
 @Controller("api/card")
 export class CardController {
   constructor(private readonly cardService: Card) {}
 
-  @UseGuards(AuthGuard)
   @Get("/get-one/:id")
-  async getOneCard(@Param("id") id: { id: string }) {
-    return await this.cardService.findOne(id.id);
+  async getOneCard(@Param("id") id: string) {
+    console.log(id);
+    return await this.cardService.findOne(id);
   }
 
   @Post("/create")
@@ -58,5 +59,13 @@ export class CardController {
       );
     }
     return await this.cardService.searchCard(searchCardDto);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("admin/search")
+  async searchCards(
+    @Query() searchCardDto: AdminSearchCardDto,
+  ): Promise<CardDetails[]> {
+    return this.cardService.adminSearchCard(searchCardDto);
   }
 }
